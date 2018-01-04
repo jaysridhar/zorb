@@ -31,14 +31,36 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class app
 {
+    static private class Require implements Function<String,Object> {
+	private ScriptEngine engine;
+
+	public Require(ScriptEngine engine) { this.engine = engine; }
+
+	public Object apply(String name) {
+	    String fileName = name + ".js";
+	    try {
+		return engine.eval(new FileReader(fileName));
+	    } catch(java.io.FileNotFoundException |
+		    javax.script.ScriptException ex ) {
+		System.err.println("Error loading " + fileName + ": " +
+				   ex.getMessage());
+		return null;
+	    }
+	}
+    }
+
     static private void jsrepl(String[] args)
-	throws java.io.IOException
+	throws java.io.IOException,
+	       java.lang.ClassNotFoundException,
+	       javax.script.ScriptException
     {
 	ScriptEngineManager mgr = new ScriptEngineManager();
 	ScriptEngine engine = mgr.getEngineByName("javascript");
 	Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 	bindings.put("argv", args);
 	bindings.put("c", new Chrome());
+	bindings.put("system", engine.eval("Java.type('java.lang.System')"));
+	bindings.put("require", new Require(engine));
 
 	if ( args.length > 0 ) {
 	    String arg = args[0];
