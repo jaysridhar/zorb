@@ -21,7 +21,14 @@ public class Chrome
 
     private WebDriver driver = null;
 
-    public void start() { driver = new ChromeDriver(); }
+    public void start(String... args) {
+	ChromeOptions opts = new ChromeOptions();
+	for (String arg : args) {
+	    if ( arg.equalsIgnoreCase("headless") )
+		opts.addArguments("--headless");
+	}
+	driver = new ChromeDriver(opts);
+    }
     public void quit() { if ( driver != null ) driver.quit(); driver = null; }
     public void go(String url) { driver.get(url); }
     public List<WebElement> css(WebElement ctx,String css) {
